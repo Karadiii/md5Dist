@@ -5,7 +5,7 @@ QUEUE_SIZE = 10
 BUFFER_SIZE = 1024
 IP = '0.0.0.0'
 PORT = 8080
-ENCODED = '393a02a8b46c706c42e3aa9795cc73ca'
+ENCODED = 'dc36fecdcd65b2b2f0e12567f26167f4'
 LATEST_R = 0
 CRANGE = 5000
 
@@ -28,13 +28,20 @@ def handle_connection(client_socket, client_address):
         c_count = int(client_socket.recv(BUFFER_SIZE).decode())
         erange = LATEST_R + (CRANGE * c_count)
         drange = str(LATEST_R + 1) + '-' + str(erange)
+        LATEST_R = erange
         client_socket.send(drange.encode())
         for i in range(0, c_count + 1):
-            response = client_socket.recv(BUFFER_SIZE).decode()
+            response = ''
+            while '#' not in response:
+                response_part = client_socket.recv(BUFFER_SIZE).decode()
+                response += response_part
             response = response[:len(response) - 1]
             if response == 'Y':
-                decoded_message = client_socket.recv(BUFFER_SIZE).decode()
-                print('Original message found - ' + decoded_message)
+                decoded_message = ''
+                while '#' not in decoded_message:
+                    decoded_part = client_socket.recv(BUFFER_SIZE).decode()
+                    decoded_message += decoded_part
+                print('Original message found - ' + decoded_message[:len(decoded_message) - 1])
                 found = True
     except (socket.error, ValueError) as err:
         print('Received exception - ' + str(err))
