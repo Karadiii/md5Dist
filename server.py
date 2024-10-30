@@ -1,3 +1,11 @@
+"""
+Author: Ido Karadi
+Project name: md5 Distributed (server)
+Description: Server side for a simple md5 bruteforce server
+Date: 30/10/24
+"""
+
+
 import socket
 from threading import Thread
 
@@ -16,8 +24,7 @@ def handle_connection(client_socket, client_address):
     """
     Handle_connection function:
     handles each client's connection in a separate thread.
-    contains the logic for the server/client communication protocol, according to client's choice.
-    Infinite loop until client closes program.
+    contains the logic for the server/client communication protocol, and proceeds according to client's response.
     """
     global ENCODED
     global LATEST_R
@@ -52,21 +59,28 @@ def handle_connection(client_socket, client_address):
 def main():
     """
     starts the server, starting thread for each client
-    on an infinite loop.
+    on a loop running until the original string is found.
+    a timeout is set to happen every second so the blocking accept call stops and lets the server check if found.
     """
     global found
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.settimeout(1.0)
     try:
         server_socket.bind((IP, PORT))
         server_socket.listen(QUEUE_SIZE)
         print("Listening for connections on port %d" % PORT)
         while not found:
-            client_socket, client_address = server_socket.accept()
-            thread = Thread(target=handle_connection, args=(client_socket, client_address))
-            thread.start()
+            try:
+                client_socket, client_address = server_socket.accept()
+                thread = Thread(target=handle_connection, args=(client_socket, client_address))
+                thread.start()
+            except socket.timeout:
+                continue
+
     except socket.error as err:
         print('Received socket exception - ' + str(err))
     finally:
+        print('Original string found, shutting down.')
         server_socket.close()
 
 

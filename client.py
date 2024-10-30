@@ -1,3 +1,11 @@
+"""
+Author: Ido Karadi
+Project name: md5 Distributed (client)
+Description: Client side for a simple md5 bruteforce server
+Date: 30/10/24
+"""
+
+
 import socket
 import hashlib
 import threading
